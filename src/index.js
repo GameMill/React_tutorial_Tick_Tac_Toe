@@ -22,7 +22,22 @@ function Square(props) {
     }
   
     render() {
-  
+      let rows = []
+      for (let X = 0; X < this.props.X; X++)
+      {
+        let row = []
+        for (let Y = 0; Y < this.props.Y; Y++)
+        {
+          row.push(this.renderSquare(X*(Y*this.props.X)));
+        }
+        rows.push(<div className="board-row">{row}</div>)
+      }
+      return (
+        <div>
+          {rows}
+        </div>
+      )
+
       return (
         <div>
           <div className="board-row">
@@ -86,8 +101,17 @@ function Square(props) {
         
         const moves = history.map((step,move) => {
             const desc = move ?
-                'Go to move #' + move :
-                'Go to game start';
+              
+              (move == this.state.stepNumber) ? 
+                  <b> Go to move #{move} </b> :
+                  'Go to move #' + move 
+                :
+                (step == current.stepNumber-1) ? 
+                  <b> Go to game start </b> :
+                  'Go to game start' 
+                ;
+            if(step == current.stepNumber-1)
+              desc = "<b>"+desc+"</b>";
                 return (
                     <li key={move}>
                       <button onClick={() => this.jumpTo(move)}>{desc}</button>
@@ -100,13 +124,18 @@ function Square(props) {
         if (winner) {
             status = 'Winner: '+ winner;
         } else {
+          if(checkHasMoves(current.squares))
             status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+          else
+            status = 'Draw. Better luck next time'
         }
 
     return (
         <div className="game">
           <div className="game-board">
           <Board
+            X={this.props.X}
+            Y={this.props.Y}
             squares={current.squares}
             onClick={(i) => this.handleClick(i)}
           />
@@ -123,9 +152,19 @@ function Square(props) {
   // ========================================
   
   ReactDOM.render(
-    <Game />,
+    <Game X={3} Y={3}  />,
     document.getElementById('root')
   );
+
+  function checkHasMoves(squares)
+  {
+    let status = false;
+    squares.forEach(element => {
+      if (element == null)
+        status = true
+    });
+    return status;
+  }
   
   function calculateWinner(squares) {
     const lines = [
@@ -141,7 +180,7 @@ function Square(props) {
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
+        return lines[i];
       }
     }
     return null;
