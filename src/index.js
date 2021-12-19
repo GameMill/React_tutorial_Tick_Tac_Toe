@@ -49,7 +49,7 @@ function Square(props) {
       constructor(props) {
           super(props);
           this.state = {
-              History:[
+              history:[
                   { squares:Array(9).fill(null) }
               ],
               xIsNext: true,
@@ -57,7 +57,7 @@ function Square(props) {
       }
       handleClick(i){
           console.log(i)
-        const history = this.state.History
+        const history = this.state.history
         const current = history[history.length - 1]
         const squares = current.squares.slice();
         if (calculateWinner(squares) || squares[i]) {
@@ -72,7 +72,7 @@ function Square(props) {
           });
     }
     render() {
-        const history = this.state.History
+        const history = this.state.history
         const current = history[history.length - 1]
         const winner = calculateWinner(current.squares)
         
@@ -80,7 +80,7 @@ function Square(props) {
         if (winner) {
             status = 'Winner: '+ winner;
         } else {
-            status = 'Next player: ' + (this.props.xIsNext ? 'X' : 'O');
+            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
         }
 
     return (
