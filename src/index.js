@@ -4,7 +4,7 @@ import './index.css';
 
 function Square(props) {
     return (
-      <button className="square" onClick={props.onClick}>
+      <button key={"5"+props.index} className="square" onClick={props.onClick}>
         {props.value}
       </button>
     );
@@ -15,6 +15,7 @@ function Square(props) {
     renderSquare(i) {
       return (
         <Square 
+            index={i}
             value={this.props.squares[i]}
             onClick={() => this.props.onClick(i)}
         />
@@ -22,41 +23,23 @@ function Square(props) {
     }
   
     render() {
-      let rows = []
-      for (let X = 0; X < this.props.X; X++)
-      {
-        let row = []
-        for (let Y = 0; Y < this.props.Y; Y++)
-        {
-          row.push(this.renderSquare(X*(Y*this.props.X)));
-        }
-        rows.push(<div className="board-row">{row}</div>)
-      }
       return (
         <div>
-          {rows}
+          {Array(this.props.Y).fill(null).map((v,y)=>{
+            return(
+              <div className="board-row" key={"r"+y}>
+              {
+                Array(this.props.X).fill(null).map((v,x)=>{
+                  const i = (x+1)+(y*this.props.Y)
+                  return this.renderSquare(i)
+                })
+              
+              }
+            </div>
+          )})}
         </div>
       )
 
-      return (
-        <div>
-          <div className="board-row">
-            {this.renderSquare(0)}
-            {this.renderSquare(1)}
-            {this.renderSquare(2)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(3)}
-            {this.renderSquare(4)}
-            {this.renderSquare(5)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(6)}
-            {this.renderSquare(7)}
-            {this.renderSquare(8)}
-          </div>
-        </div>
-      );
     }
   }
   
@@ -100,18 +83,29 @@ function Square(props) {
         const winner = calculateWinner(current.squares)
         
         const moves = history.map((step,move) => {
-            const desc = move ?
-              
-              (move == this.state.stepNumber) ? 
-                  <b> Go to move #{move} </b> :
-                  'Go to move #' + move 
+          let lastMove;
+          let XY
+          if (this.state.history.length > 1 && move > 0) {
+            lastMove = getLastMove(this.state.history[move-1].squares,this.state.history[move].squares)
+            XY = getXY(lastMove,this.props.X,this.props.Y)
+          }
+          else{
+            lastMove = null
+            XY = ""
+          }
+          
+
+            let desc = move ?
+              (move === this.state.stepNumber) ? 
+                  <b> Go to move #{move} {XY} </b> :
+                  'Go to move #' + move + " "+XY
                 :
-                (step == current.stepNumber-1) ? 
+                (step === current.stepNumber-1) ? 
                   <b> Go to game start </b> :
                   'Go to game start' 
                 ;
-            if(step == current.stepNumber-1)
-              desc = "<b>"+desc+"</b>";
+              
+
                 return (
                     <li key={move}>
                       <button onClick={() => this.jumpTo(move)}>{desc}</button>
@@ -156,6 +150,25 @@ function Square(props) {
     document.getElementById('root')
   );
 
+  function getLastMove(LastMove,Current) {  
+    for (let i = 0; i < LastMove.length; i++) {
+      if (LastMove[i] !== Current[i]) {
+        return i;
+      }
+    }
+    return null;
+  }
+  function getXY(index,X,Y)
+  {
+    console.log(index,X,Y);
+    let x = Math.floor(index % X);
+    let y = ((index-x) / Y)+1
+    if (x === 0){
+      x = 3
+    }
+
+    return "("+x+","+y+")";
+  }
   function checkHasMoves(squares)
   {
     let status = false;
